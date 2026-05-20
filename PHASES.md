@@ -1,0 +1,79 @@
+# nmap-vis — Build Phases
+
+## Phase 1: Foundation [DONE]
+Project skeleton, Docker, dev environment.
+
+- [x] Git repo + GitHub remote
+- [x] CLAUDE.md with project rules
+- [x] Docker: Kali-slim + nmap image, docker-compose
+- [x] Backend: FastAPI skeleton, health route, config
+- [x] Frontend: Vite + React + TypeScript + Tailwind
+- [x] Makefile, .gitignore, README
+
+---
+
+## Phase 2: Scanner Core [DONE]
+Build nmap commands from UI, execute in Docker, return results.
+
+- [x] Pydantic models: ScanRequest, ScanResult, Host, Port
+- [x] flags.json: 35 nmap flags with descriptions
+- [x] Fluent Builder: command_builder.py with input validation
+- [x] Docker Manager: async container facade (aiodocker)
+- [x] XML Parser: nmap output to structured data
+- [x] Scan routes: POST /scan, GET /scan/{id}
+- [x] Frontend: ScanPage, TargetInput, ScanTypeSelector, TimingSlider
+- [x] Frontend: FlagPicker, FlagToggle, CommandPreview
+- [x] Schema-driven flags.ts with toFlag() functions
+- [x] Zustand store for scan state
+
+---
+
+## Phase 3: Real-Time Streaming [NEXT]
+Live scan output via WebSocket, snapshot + delta protocol.
+
+- [ ] scan_store.py: in-memory active scans + asyncio pub/sub event bus
+- [ ] WebSocket endpoint: /scan/{id}/stream
+- [ ] Snapshot + Delta: full state on connect, then deltas
+- [ ] useWebSocket.ts: shared WebSocket hook
+- [ ] useScan.ts: scan lifecycle hook
+- [ ] TerminalView.tsx: virtualized raw output
+- [ ] Wire scanner UI to live terminal output
+
+---
+
+## Phase 4: Radar Visualization
+Animated radar sweep during scan, transforms to network map when done.
+
+- [ ] RadarSweep.tsx: canvas-based radar animation
+- [ ] Radar pings hosts as discovered via WebSocket
+- [ ] NetworkMap.tsx: D3 force-directed graph
+- [ ] HostNode.tsx: node (size=ports, color=status)
+- [ ] PortBadge.tsx: port indicators on host nodes
+- [ ] Transition animation: radar -> network map on complete
+- [ ] Zoom, pan, drag interactions
+
+---
+
+## Phase 5: History, Scripts & Presets
+Scan persistence, NSE scripts, quick-start presets.
+
+- [ ] history_store.py: SQLite for completed scans
+- [ ] History routes: GET /history, GET /history/{id}
+- [ ] HistoryPage, ScanCard, useHistory
+- [ ] Scan presets: Quick, Intense, Full Port, Vuln
+- [ ] scripts.json: common NSE scripts with descriptions
+- [ ] Scripts route: GET /scripts
+- [ ] ScriptSelector.tsx: pick/search NSE scripts
+- [ ] Custom script editor
+
+---
+
+## Phase 6: Open Source Polish
+Tests, CI, docs, contributing guide.
+
+- [ ] Backend tests: command_builder, parser, routes
+- [ ] Frontend tests: scanner, radar components
+- [ ] GitHub Actions CI: lint + test + docker build
+- [ ] CONTRIBUTING.md: how to add flags, features, structure
+- [ ] README.md: screenshots, setup, architecture diagram
+- [ ] MIT License

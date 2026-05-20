@@ -79,7 +79,7 @@ class CommandBuilder:
             joined = ",".join(self._scripts)
             parts.append(f"--script={joined}")
 
-        parts.extend(["-oX", "-", self._target])
+        parts.extend(["-oX", "/output/scan.xml", "-v", self._target])
 
         return " ".join(parts)
 

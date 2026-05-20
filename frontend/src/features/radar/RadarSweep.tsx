@@ -73,6 +73,7 @@ interface BlipState {
   portCount: number
   opacity: number
   pulsePhase: number
+  discoveredAt: number
 }
 
 function syncBlips(ref: React.MutableRefObject<BlipState[]>, hosts: Host[]) {
@@ -87,6 +88,7 @@ function syncBlips(ref: React.MutableRefObject<BlipState[]>, hosts: Host[]) {
       portCount: host.ports?.length ?? 0,
       opacity: 1,
       pulsePhase: Math.random() * Math.PI * 2,
+      discoveredAt: Date.now() / 1000,
     })
   }
 }
@@ -201,26 +203,87 @@ function drawBlips(
   for (const blip of blips) {
     const x = center + Math.cos(blip.angle) * blip.distance * radius
     const y = center + Math.sin(blip.angle) * blip.distance * radius
-    const pulse = 0.7 + 0.3 * Math.sin(now * 2 + blip.pulsePhase)
-    const size = 3 + Math.min(blip.portCount, 10) * 0.5
+    const color = blip.portCount > 5 ? RADAR_AMBER : RADAR_GREEN
 
-    ctx.shadowColor = RADAR_GREEN
-    ctx.shadowBlur = 8
+    const breathe = 0.6 + 0.4 * Math.sin(now * 1.5 + blip.pulsePhase)
+    const flicker = 0.9 + 0.1 * Math.sin(now * 8 + blip.pulsePhase * 3)
+    const baseSize = 5 + Math.min(blip.portCount, 10) * 1.2
+    const size = baseSize * (0.9 + 0.1 * Math.sin(now * 3 + blip.pulsePhase))
 
-    ctx.fillStyle = blip.portCount > 5 ? RADAR_AMBER : RADAR_GREEN
-    ctx.globalAlpha = blip.opacity * pulse
+    drawPingRing(ctx, x, y, now, blip.discoveredAt, color)
+
+    const outerGlow = ctx.createRadialGradient(x, y, 0, x, y, size * 4)
+    outerGlow.addColorStop(0, color)
+    outerGlow.addColorStop(0.3, color + '40')
+    outerGlow.addColorStop(1, 'transparent')
+    ctx.fillStyle = outerGlow
+    ctx.globalAlpha = breathe * 0.4 * flicker
+    ctx.beginPath()
+    ctx.arc(x, y, size * 4, 0, Math.PI * 2)
+    ctx.fill()
+
+    const midGlow = ctx.createRadialGradient(x, y, 0, x, y, size * 2)
+    midGlow.addColorStop(0, color)
+    midGlow.addColorStop(0.5, color + '80')
+    midGlow.addColorStop(1, 'transparent')
+    ctx.fillStyle = midGlow
+    ctx.globalAlpha = breathe * 0.6 * flicker
+    ctx.beginPath()
+    ctx.arc(x, y, size * 2, 0, Math.PI * 2)
+    ctx.fill()
+
+    ctx.shadowColor = color
+    ctx.shadowBlur = 25
+    ctx.fillStyle = color
+    ctx.globalAlpha = blip.opacity * flicker
     ctx.beginPath()
     ctx.arc(x, y, size, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.globalAlpha = blip.opacity * 0.3
+    ctx.shadowBlur = 0
+    ctx.fillStyle = '#ffffff'
+    ctx.globalAlpha = breathe * 0.8
     ctx.beginPath()
-    ctx.arc(x, y, size + 4, 0, Math.PI * 2)
+    ctx.arc(x, y, size * 0.35, 0, Math.PI * 2)
     ctx.fill()
 
     ctx.globalAlpha = 1
     ctx.shadowBlur = 0
   }
+}
+
+function drawPingRing(
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number,
+  now: number, discoveredAt: number,
+  color: string
+) {
+  const age = now - discoveredAt
+  if (age > 3) return
+
+  const ringCount = 3
+  for (let i = 0; i < ringCount; i++) {
+    const delay = i * 0.4
+    const ringAge = age - delay
+    if (ringAge < 0) continue
+
+    const progress = Math.min(ringAge / 1.5, 1)
+    const ringRadius = 5 + progress * 40
+    const ringAlpha = (1 - progress) * 0.6
+
+    ctx.strokeStyle = color
+    ctx.lineWidth = 2 - progress * 1.5
+    ctx.globalAlpha = ringAlpha
+    ctx.shadowColor = color
+    ctx.shadowBlur = 15
+
+    ctx.beginPath()
+    ctx.arc(x, y, ringRadius, 0, Math.PI * 2)
+    ctx.stroke()
+  }
+
+  ctx.shadowBlur = 0
+  ctx.globalAlpha = 1
 }
 
 function drawHUD(

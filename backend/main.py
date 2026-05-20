@@ -7,9 +7,12 @@ from config import settings
 from logger import get_logger
 from middleware import RequestLogMiddleware
 from routes.health import router as health_router
+from routes.history import router as history_router
 from routes.scan import router as scan_router
+from routes.scripts import router as scripts_router
 from routes.stream import router as stream_router
 from services.docker_manager import docker_manager
+from store import history_store
 
 log = get_logger("app")
 
@@ -17,6 +20,7 @@ log = get_logger("app")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("Starting nmap-vis backend")
+    history_store.init_db()
     await docker_manager.connect()
     yield
     await docker_manager.disconnect()
@@ -37,3 +41,5 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(scan_router)
 app.include_router(stream_router)
+app.include_router(history_router)
+app.include_router(scripts_router)

@@ -35,12 +35,17 @@ export function useScanStream(scanId: string | null) {
           outputLines: [...prev.outputLines, message.line],
         }))
         break
-      case 'host_discovered':
-        setState((prev) => ({
-          ...prev,
-          hosts: [...prev.hosts, message.host],
-        }))
+      case 'host_discovered': {
+        const host = message.host as Host
+        setState((prev) => {
+          const exists = prev.hosts.findIndex((h) => h.ip === host.ip)
+          const hosts = exists >= 0
+            ? prev.hosts.map((h) => h.ip === host.ip ? host : h)
+            : [...prev.hosts, host]
+          return { ...prev, hosts }
+        })
         break
+      }
       case 'completed':
         setState((prev) => ({
           ...prev,

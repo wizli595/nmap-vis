@@ -6,6 +6,7 @@ import { FlagPicker } from './FlagPicker'
 import { CommandPreview } from './CommandPreview'
 import { LiveScanView } from './LiveScanView'
 import { useScanStore } from '../../stores/scanStore'
+import { ALL_FLAG_GROUPS } from '../../data/flags'
 import { startScan } from '../../api/scan'
 
 type View = { kind: 'builder' } | { kind: 'live'; scanId: string }
@@ -104,12 +105,20 @@ function ErrorBanner({ message }: { message: string }) {
 }
 
 function buildFlagList(flagValues: Record<string, string | boolean | number>): string[] {
-  return Object.entries(flagValues)
-    .filter(([key, val]) => {
-      if (key === 'portRange' || key === 'topPorts') return false
-      return typeof val === 'boolean' ? val : Boolean(val)
-    })
-    .map(([_, val]) => String(val))
+  const flags: string[] = []
+
+  for (const group of ALL_FLAG_GROUPS) {
+    for (const flag of group.flags) {
+      const value = flagValues[flag.id]
+      if (!value) continue
+      if (flag.id === 'portRange' || flag.id === 'topPorts') continue
+
+      const result = flag.toFlag(value)
+      if (result) flags.push(result)
+    }
+  }
+
+  return flags
 }
 
 function extractPort(flagValues: Record<string, string | boolean | number>): string {

@@ -6,23 +6,23 @@ from services.command_builder import CommandBuilder
 class TestBasicCommand:
     def test_minimal_command(self):
         cmd = CommandBuilder().target("192.168.1.1").build()
-        assert cmd == "nmap -sS -T3 -oX - 192.168.1.1"
+        assert cmd == "nmap -sS -T3 -oX /output/scan.xml -v 192.168.1.1"
 
     def test_with_scan_type(self):
         cmd = CommandBuilder().target("10.0.0.1").scan_type("-sT").build()
-        assert cmd == "nmap -sT -T3 -oX - 10.0.0.1"
+        assert cmd == "nmap -sT -T3 -oX /output/scan.xml -v 10.0.0.1"
 
     def test_with_timing(self):
         cmd = CommandBuilder().target("10.0.0.1").timing(4).build()
-        assert cmd == "nmap -sS -T4 -oX - 10.0.0.1"
+        assert cmd == "nmap -sS -T4 -oX /output/scan.xml -v 10.0.0.1"
 
     def test_with_ports(self):
         cmd = CommandBuilder().target("10.0.0.1").ports("1-1000").build()
-        assert cmd == "nmap -sS -T3 -p 1-1000 -oX - 10.0.0.1"
+        assert cmd == "nmap -sS -T3 -p 1-1000 -oX /output/scan.xml -v 10.0.0.1"
 
     def test_with_specific_ports(self):
         cmd = CommandBuilder().target("10.0.0.1").ports("22,80,443").build()
-        assert cmd == "nmap -sS -T3 -p 22,80,443 -oX - 10.0.0.1"
+        assert cmd == "nmap -sS -T3 -p 22,80,443 -oX /output/scan.xml -v 10.0.0.1"
 
 
 class TestFlags:
@@ -81,11 +81,11 @@ class TestFullCommand:
             .add_script("vulners")
             .build()
         )
-        assert cmd == "nmap -sV -T4 -p 1-1000 -O --open --script=vulners -oX - 192.168.1.0/24"
+        assert cmd == "nmap -sV -T4 -p 1-1000 -O --open --script=vulners -oX /output/scan.xml -v 192.168.1.0/24"
 
     def test_xml_output_always_present(self):
         cmd = CommandBuilder().target("10.0.0.1").build()
-        assert "-oX -" in cmd
+        assert "-oX /output/scan.xml -v" in cmd
 
     def test_target_always_last(self):
         cmd = CommandBuilder().target("scanme.nmap.org").add_flag("-A").build()

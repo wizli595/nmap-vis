@@ -1,8 +1,11 @@
 import asyncio
+import os
 import subprocess
+import tempfile
 import threading
 from collections.abc import AsyncIterator
-from queue import Queue, Empty
+from dataclasses import dataclass, field
+from queue import Queue
 
 from config import settings
 from logger import get_logger
@@ -10,6 +13,12 @@ from logger import get_logger
 log = get_logger("docker")
 
 SENTINEL = None
+
+
+@dataclass
+class ScanOutput:
+    lines: list[str] = field(default_factory=list)
+    xml: str = ""
 
 
 class DockerManager:
@@ -25,26 +34,36 @@ class DockerManager:
 
     async def run_nmap(self, command: str) -> AsyncIterator[str]:
         args = command.split()[1:]
-        docker_cmd = [
-            "docker", "run", "--rm", "--privileged",
-            settings.nmap_image, *args,
-        ]
-        log.info(f"Running: {' '.join(docker_cmd)}")
 
-        line_queue: Queue[str | None] = Queue()
-        thread = threading.Thread(
-            target=_run_and_stream, args=(docker_cmd, line_queue), daemon=True
-        )
-        thread.start()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            docker_cmd = [
+                "docker", "run", "--rm", "--privileged",
+                "-v", f"{tmpdir}:/output",
+                settings.nmap_image, *args,
+            ]
+            log.info(f"Running: {' '.join(docker_cmd)}")
 
-        while True:
-            line = await asyncio.to_thread(_get_line, line_queue)
-            if line is SENTINEL:
-                break
-            yield line
+            line_queue: Queue[str | None] = Queue()
+            thread = threading.Thread(
+                target=_run_and_stream, args=(docker_cmd, line_queue), daemon=True
+            )
+            thread.start()
 
-        thread.join(timeout=5)
-        log.info("Container finished")
+            while True:
+                line = await asyncio.to_thread(_get_line, line_queue)
+                if line is SENTINEL:
+                    break
+                yield line
+
+            thread.join(timeout=5)
+
+            xml_path = os.path.join(tmpdir, "scan.xml")
+            if os.path.exists(xml_path):
+                with open(xml_path, "r") as f:
+                    xml_content = f.read()
+                yield f"__XML_START__\n{xml_content}\n__XML_END__"
+
+            log.info("Container finished")
 
     def _check_image(self) -> bool:
         try:

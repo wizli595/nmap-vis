@@ -35,7 +35,13 @@ async def add_host(scan_id: str, host: Host) -> None:
     scan = _scans.get(scan_id)
     if not scan:
         return
-    scan.hosts.append(host)
+
+    existing = next((h for h in scan.hosts if h.ip == host.ip), None)
+    if existing:
+        existing.ports = host.ports
+    else:
+        scan.hosts.append(host)
+
     await _publish(scan_id, {
         "type": "host_discovered",
         "host": host.model_dump(),

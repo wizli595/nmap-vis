@@ -4,10 +4,34 @@ import { ScanTypeSelector } from './ScanTypeSelector'
 import { TimingSlider } from './TimingSlider'
 import { FlagPicker } from './FlagPicker'
 import { CommandPreview } from './CommandPreview'
+import { LiveScanView } from './LiveScanView'
 import { useScanStore } from '../../stores/scanStore'
 import { startScan } from '../../api/scan'
 
+type View = { kind: 'builder' } | { kind: 'live'; scanId: string }
+
 export function ScanPage() {
+  const [view, setView] = useState<View>({ kind: 'builder' })
+
+  if (view.kind === 'live') {
+    return (
+      <LiveScanView
+        scanId={view.scanId}
+        onBack={() => setView({ kind: 'builder' })}
+      />
+    )
+  }
+
+  return (
+    <ScanBuilder onLaunch={(scanId) => setView({ kind: 'live', scanId })} />
+  )
+}
+
+interface ScanBuilderProps {
+  onLaunch: (scanId: string) => void
+}
+
+function ScanBuilder({ onLaunch }: ScanBuilderProps) {
   const [status, setStatus] = useState<'idle' | 'launching' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const store = useScanStore()
@@ -20,7 +44,7 @@ export function ScanPage() {
 
     try {
       const flags = buildFlagList(store.flagValues)
-      await startScan({
+      const result = await startScan({
         target: store.target,
         scan_type: store.scanType,
         flags,
@@ -29,6 +53,7 @@ export function ScanPage() {
         timing: store.timing,
       })
       setStatus('idle')
+      onLaunch(result.scan_id)
     } catch (err) {
       setStatus('error')
       setErrorMessage(err instanceof Error ? err.message : 'Scan failed')

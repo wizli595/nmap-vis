@@ -28,16 +28,18 @@ Build nmap commands from UI, execute in Docker, return results.
 
 ---
 
-## Phase 3: Real-Time Streaming [NEXT]
+## Phase 3: Real-Time Streaming [DONE]
 Live scan output via WebSocket, snapshot + delta protocol.
 
-- [ ] scan_store.py: in-memory active scans + asyncio pub/sub event bus
-- [ ] WebSocket endpoint: /scan/{id}/stream
-- [ ] Snapshot + Delta: full state on connect, then deltas
-- [ ] useWebSocket.ts: shared WebSocket hook
-- [ ] useScan.ts: scan lifecycle hook
-- [ ] TerminalView.tsx: virtualized raw output
-- [ ] Wire scanner UI to live terminal output
+- [x] event_bus.py: asyncio.Queue pub/sub with subscribe/publish/listen
+- [x] scan_store.py: centralized scan state with event publishing
+- [x] WebSocket endpoint: /scan/{id}/stream with snapshot + delta
+- [x] useWebSocket.ts: shared WebSocket hook
+- [x] useScanStream.ts: scan lifecycle hook with message handlers
+- [x] TerminalView.tsx: color-coded output with auto-scroll
+- [x] LiveScanView.tsx: status badges, command bar, host counter
+- [x] ScanPage switches between builder and live view
+- [x] 19 new tests (event bus + scan store), 70 total passing
 
 ---
 

@@ -8,6 +8,7 @@ from logger import get_logger
 from middleware import RequestLogMiddleware
 from routes.health import router as health_router
 from routes.scan import router as scan_router
+from routes.stream import router as stream_router
 from services.docker_manager import docker_manager
 
 log = get_logger("app")
@@ -36,3 +37,4 @@ app.add_middleware(
 
 app.include_router(health_router)
 app.include_router(scan_router)
+app.include_router(stream_router)

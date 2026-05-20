@@ -28,6 +28,7 @@ export interface ScanResult {
   command: string
   target: string
   hosts: Host[]
+  raw_output: string
   started_at: string
   finished_at?: string
 }

@@ -1,89 +1,90 @@
+import asyncio
+import subprocess
+import threading
 from collections.abc import AsyncIterator
-
-import aiodocker
+from queue import Queue, Empty
 
 from config import settings
 from logger import get_logger
 
 log = get_logger("docker")
 
+SENTINEL = None
+
 
 class DockerManager:
-    def __init__(self):
-        self._docker: aiodocker.Docker | None = None
-
     async def connect(self) -> None:
-        self._docker = aiodocker.Docker()
-        log.info(f"Connected to Docker, nmap image: {settings.nmap_image}")
+        available = self._check_image()
+        if available:
+            log.info(f"Docker ready, nmap image: {settings.nmap_image}")
+        else:
+            log.warning(f"Image not found: {settings.nmap_image}. Run: make docker-build")
 
     async def disconnect(self) -> None:
-        if self._docker:
-            await self._docker.close()
-            log.info("Docker connection closed")
+        log.info("Docker manager shutdown")
 
     async def run_nmap(self, command: str) -> AsyncIterator[str]:
-        docker = self._require_connection()
         args = command.split()[1:]
-        log.info(f"Running container: nmap {' '.join(args)}")
+        docker_cmd = [
+            "docker", "run", "--rm", "--privileged",
+            settings.nmap_image, *args,
+        ]
+        log.info(f"Running: {' '.join(docker_cmd)}")
 
-        container = await self._create_container(docker, args)
+        line_queue: Queue[str | None] = Queue()
+        thread = threading.Thread(
+            target=_run_and_stream, args=(docker_cmd, line_queue), daemon=True
+        )
+        thread.start()
 
+        while True:
+            line = await asyncio.to_thread(_get_line, line_queue)
+            if line is SENTINEL:
+                break
+            yield line
+
+        thread.join(timeout=5)
+        log.info("Container finished")
+
+    def _check_image(self) -> bool:
         try:
-            await container.start()
-            log.debug(f"Container started for: {command}")
-            async for line in self._stream_logs(container):
-                yield line
-        finally:
-            await self._cleanup(container)
-
-    async def is_image_available(self) -> bool:
-        docker = self._require_connection()
-        try:
-            await docker.images.inspect(settings.nmap_image)
-            return True
-        except aiodocker.exceptions.DockerError:
-            log.warning(f"Image not found: {settings.nmap_image}")
+            result = subprocess.run(
+                ["docker", "image", "inspect", settings.nmap_image],
+                capture_output=True, timeout=5,
+            )
+            return result.returncode == 0
+        except (subprocess.TimeoutExpired, FileNotFoundError):
             return False
 
-    def _require_connection(self) -> aiodocker.Docker:
-        if not self._docker:
-            raise RuntimeError("DockerManager not connected. Call connect() first.")
-        return self._docker
 
-    async def _create_container(
-        self, docker: aiodocker.Docker, args: list[str]
-    ) -> aiodocker.docker.DockerContainer:
-        config = {
-            "Image": settings.nmap_image,
-            "Cmd": args,
-            "HostConfig": {
-                "NetworkMode": "host",
-                "AutoRemove": False,
-            },
-        }
-        return await docker.containers.create_or_replace(
-            name=f"nmap-scan-{id(args)}", config=config
+def _run_and_stream(docker_cmd: list[str], line_queue: Queue) -> None:
+    try:
+        process = subprocess.Popen(
+            docker_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
         )
 
-    async def _stream_logs(
-        self, container: aiodocker.docker.DockerContainer
-    ) -> AsyncIterator[str]:
-        log_stream = container.log(stdout=True, stderr=True, follow=True)
-        async for line in log_stream:
+        for line in iter(process.stdout.readline, ""):
             stripped = line.strip()
             if stripped:
-                yield stripped
+                line_queue.put(stripped)
 
-    async def _cleanup(self, container: aiodocker.docker.DockerContainer) -> None:
-        try:
-            await container.stop()
-        except aiodocker.exceptions.DockerError:
-            pass
-        try:
-            await container.delete(force=True)
-        except aiodocker.exceptions.DockerError:
-            pass
-        log.debug("Container cleaned up")
+        process.wait()
+
+        if process.returncode != 0:
+            log.warning(f"Container exited with code {process.returncode}")
+
+    except Exception as err:
+        log.error(f"Docker run failed: {err}")
+        line_queue.put(f"Error: {err}")
+    finally:
+        line_queue.put(SENTINEL)
+
+
+def _get_line(q: Queue) -> str | None:
+    return q.get()
 
 
 docker_manager = DockerManager()

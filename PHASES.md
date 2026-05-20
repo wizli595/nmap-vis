@@ -43,16 +43,18 @@ Live scan output via WebSocket, snapshot + delta protocol.
 
 ---
 
-## Phase 4: Radar Visualization
+## Phase 4: Radar Visualization [DONE]
 Animated radar sweep during scan, transforms to network map when done.
 
-- [ ] RadarSweep.tsx: canvas-based radar animation
-- [ ] Radar pings hosts as discovered via WebSocket
-- [ ] NetworkMap.tsx: D3 force-directed graph
-- [ ] HostNode.tsx: node (size=ports, color=status)
-- [ ] PortBadge.tsx: port indicators on host nodes
-- [ ] Transition animation: radar -> network map on complete
-- [ ] Zoom, pan, drag interactions
+- [x] RadarSweep.tsx: canvas radar with sweep beam, trail, grid, range rings, HUD
+- [x] Host blips appear on radar as discovered, pulse animation, size by port count
+- [x] NetworkMap.tsx: D3 force-directed graph with zoom/pan
+- [x] HostNode.tsx: SVG node (size=open ports, color=status)
+- [x] PortBadge.tsx: color-coded port state badges
+- [x] HostDetail.tsx: click host to see ports, OS, hostname
+- [x] RadarPage.tsx: toggle between radar and map, auto-switches on completion
+- [x] LiveScanView: tabbed layout with Radar and Terminal tabs
+- [x] D3 zoom, pan interactions on network map
 
 ---
 

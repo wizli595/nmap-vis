@@ -18,7 +18,6 @@ log = get_logger("app")
 async def lifespan(app: FastAPI):
     log.info("Starting nmap-vis backend")
     await docker_manager.connect()
-    log.info("Docker connection established")
     yield
     await docker_manager.disconnect()
     log.info("Shutdown complete")

@@ -1,0 +1,102 @@
+[
+  {
+    "name": "vuln",
+    "description": "Run all vulnerability detection scripts",
+    "category": "vulnerability"
+  },
+  {
+    "name": "http-title",
+    "description": "Show the title of web pages on HTTP servers",
+    "category": "discovery"
+  },
+  {
+    "name": "http-headers",
+    "description": "Show HTTP response headers from web servers",
+    "category": "discovery"
+  },
+  {
+    "name": "ssl-enum-ciphers",
+    "description": "List SSL/TLS ciphers and grade the connection strength",
+    "category": "security"
+  },
+  {
+    "name": "ssl-cert",
+    "description": "Show SSL certificate details (issuer, expiry, SANs)",
+    "category": "security"
+  },
+  {
+    "name": "ssh-hostkey",
+    "description": "Show SSH host key fingerprints",
+    "category": "discovery"
+  },
+  {
+    "name": "smb-os-discovery",
+    "description": "Detect OS, computer name, domain via SMB",
+    "category": "discovery"
+  },
+  {
+    "name": "smb-enum-shares",
+    "description": "List shared folders on SMB/Windows hosts",
+    "category": "enumeration"
+  },
+  {
+    "name": "dns-brute",
+    "description": "Brute-force DNS subdomains",
+    "category": "enumeration"
+  },
+  {
+    "name": "ftp-anon",
+    "description": "Check if FTP allows anonymous login",
+    "category": "vulnerability"
+  },
+  {
+    "name": "http-enum",
+    "description": "Enumerate common web directories and files",
+    "category": "enumeration"
+  },
+  {
+    "name": "http-sql-injection",
+    "description": "Test for SQL injection in web parameters",
+    "category": "vulnerability"
+  },
+  {
+    "name": "http-robots.txt",
+    "description": "Fetch and display robots.txt contents",
+    "category": "discovery"
+  },
+  {
+    "name": "banner",
+    "description": "Grab service banners from open ports",
+    "category": "discovery"
+  },
+  {
+    "name": "default",
+    "description": "Run nmap's default safe script set",
+    "category": "general"
+  },
+  {
+    "name": "auth",
+    "description": "Run all authentication-related scripts",
+    "category": "security"
+  },
+  {
+    "name": "broadcast",
+    "description": "Discover hosts via broadcast protocols (mDNS, SSDP)",
+    "category": "discovery"
+  },
+  {
+    "name": "mysql-info",
+    "description": "Get MySQL server version and capabilities",
+    "category": "discovery"
+  },
+  {
+    "name": "whois-ip",
+    "description": "Look up WHOIS info for target IP addresses",
+    "category": "discovery"
+  },
+  {
+    "name": "traceroute-geolocation",
+    "description": "Geolocate each hop in a traceroute",
+    "category": "discovery"
+  }
+]

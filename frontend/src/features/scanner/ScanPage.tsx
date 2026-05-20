@@ -4,6 +4,8 @@ import { ScanTypeSelector } from './ScanTypeSelector'
 import { TimingSlider } from './TimingSlider'
 import { FlagPicker } from './FlagPicker'
 import { CommandPreview } from './CommandPreview'
+import { PresetSelector } from './PresetSelector'
+import { ScriptSelector } from './ScriptSelector'
 import { LiveScanView } from './LiveScanView'
 import { useScanStore } from '../../stores/scanStore'
 import { ALL_FLAG_GROUPS } from '../../data/flags'
@@ -63,10 +65,12 @@ function ScanBuilder({ onLaunch }: ScanBuilderProps) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <PresetSelector />
       <TargetInput />
       <ScanTypeSelector />
       <TimingSlider />
       <FlagPicker />
+      <ScriptSelector />
       <CommandPreview />
       <LaunchButton
         disabled={!store.target || status === 'launching'}

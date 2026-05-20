@@ -58,17 +58,17 @@ Animated radar sweep during scan, transforms to network map when done.
 
 ---
 
-## Phase 5: History, Scripts & Presets
+## Phase 5: History, Scripts & Presets [DONE]
 Scan persistence, NSE scripts, quick-start presets.
 
-- [ ] history_store.py: SQLite for completed scans
-- [ ] History routes: GET /history, GET /history/{id}
-- [ ] HistoryPage, ScanCard, useHistory
-- [ ] Scan presets: Quick, Intense, Full Port, Vuln
-- [ ] scripts.json: common NSE scripts with descriptions
-- [ ] Scripts route: GET /scripts
-- [ ] ScriptSelector.tsx: pick/search NSE scripts
-- [ ] Custom script editor
+- [x] history_store.py: SQLite storage, auto-saves completed scans
+- [x] History routes: GET /history, GET /history/{id}
+- [x] HistoryPage with ScanCards, HistoryDetailView with radar/terminal
+- [x] App navigation: Scanner | History tabs in header
+- [x] 6 scan presets: Quick, Intense, Full Port, Vuln, Stealth, Ping Sweep
+- [x] scripts.json: 20 common NSE scripts with descriptions
+- [x] Scripts route: GET /scripts
+- [x] ScriptSelector.tsx: searchable picker with selected tags
 
 ---
 

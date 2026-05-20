@@ -4,6 +4,7 @@ from typing import Any
 from logger import get_logger
 from models.scan import ScanResult, ScanStatus, Host
 from store.event_bus import event_bus
+from store import history_store
 
 log = get_logger("scan_store")
 
@@ -57,6 +58,7 @@ async def mark_completed(scan_id: str, hosts: list[Host]) -> None:
     scan.finished_at = datetime.now()
     await _publish(scan_id, {"type": "completed", "host_count": len(hosts)})
     await event_bus.close_channel(scan_id)
+    history_store.save(scan)
     log.info(f"Scan {scan_id} completed: {len(hosts)} hosts")
 
 

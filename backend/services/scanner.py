@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 from uuid import uuid4
 
 from logger import get_logger
@@ -7,10 +6,9 @@ from models.scan import ScanRequest, ScanResult, ScanStatus
 from services.command_builder import CommandBuilder
 from services.docker_manager import docker_manager
 from services.parser import parse_nmap_xml
+from store import scan_store
 
 log = get_logger("scanner")
-
-ACTIVE_SCANS: dict[str, ScanResult] = {}
 
 
 def build_command(request: ScanRequest) -> str:
@@ -43,41 +41,32 @@ async def start_scan(request: ScanRequest) -> ScanResult:
         command=command,
         target=request.target,
     )
-    ACTIVE_SCANS[scan_id] = result
+    scan_store.create(result)
 
     asyncio.create_task(_execute_scan(scan_id, command))
     return result
 
 
 def get_scan(scan_id: str) -> ScanResult | None:
-    return ACTIVE_SCANS.get(scan_id)
+    return scan_store.get(scan_id)
 
 
 def list_scans() -> list[ScanResult]:
-    return list(ACTIVE_SCANS.values())
+    return scan_store.list_all()
 
 
 async def _execute_scan(scan_id: str, command: str) -> None:
-    scan = ACTIVE_SCANS[scan_id]
     xml_buffer = []
 
     try:
         async for line in docker_manager.run_nmap(command):
-            scan.raw_output += line + "\n"
+            await scan_store.append_output(scan_id, line)
             xml_buffer.append(line)
 
         xml_content = "\n".join(xml_buffer)
-        scan.hosts = parse_nmap_xml(xml_content)
-        scan.status = ScanStatus.COMPLETED
-
-        host_count = len(scan.hosts)
-        port_count = sum(len(h.ports) for h in scan.hosts)
-        log.info(f"Scan {scan_id} completed: {host_count} hosts, {port_count} ports")
+        hosts = parse_nmap_xml(xml_content)
+        await scan_store.mark_completed(scan_id, hosts)
 
     except Exception as err:
-        scan.status = ScanStatus.FAILED
-        scan.raw_output += f"\nError: {err}"
+        await scan_store.mark_failed(scan_id, str(err))
         log.error(f"Scan {scan_id} failed: {err}")
-
-    finally:
-        scan.finished_at = datetime.now()

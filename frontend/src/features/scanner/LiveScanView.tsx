@@ -118,10 +118,12 @@ function badgeColor(label: string, type: string): string {
 }
 
 function CommandBar({ command }: { command: string }) {
+  const display = command.replace(' -oX -', '')
+
   return (
     <div className="bg-black/50 border border-[var(--hud-border)] rounded px-4 py-3 font-mono text-sm overflow-x-auto">
       <span className="text-[var(--radar-amber)]">$ </span>
-      <span className="text-[var(--radar-green)]">{command}</span>
+      <span className="text-[var(--radar-green)]">{display}</span>
     </div>
   )
 }

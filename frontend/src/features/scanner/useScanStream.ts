@@ -1,11 +1,14 @@
-import { useState, useCallback } from 'react'
-import { useWebSocket } from '../../hooks/useWebSocket'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { getScan } from '../../api/scan'
 import type { ScanResult, Host } from '../../types/scan'
+
+const WS_BASE = `ws://localhost:8001`
 
 interface ScanStreamState {
   scan: ScanResult | null
   outputLines: string[]
   hosts: Host[]
+  connectionStatus: 'connecting' | 'connected' | 'disconnected'
 }
 
 export function useScanStream(scanId: string | null) {
@@ -13,79 +16,133 @@ export function useScanStream(scanId: string | null) {
     scan: null,
     outputLines: [],
     hosts: [],
+    connectionStatus: 'disconnected',
   })
 
-  const wsUrl = scanId
-    ? `ws://${location.host}/ws/scan/${scanId}/stream`
-    : null
+  const wsRef = useRef<WebSocket | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const handleMessage = useCallback((data: unknown) => {
-    const message = data as Record<string, unknown>
+  const handleMessage = useCallback((event: MessageEvent) => {
+    const message = JSON.parse(event.data)
 
     switch (message.type) {
       case 'snapshot':
-        handleSnapshot(message, setState)
+        applySnapshot(message, setState)
         break
       case 'output':
-        handleOutput(message, setState)
+        setState((prev) => ({
+          ...prev,
+          outputLines: [...prev.outputLines, message.line],
+        }))
         break
       case 'host_discovered':
-        handleHostDiscovered(message, setState)
+        setState((prev) => ({
+          ...prev,
+          hosts: [...prev.hosts, message.host],
+        }))
         break
       case 'completed':
-        handleCompleted(setState)
+        setState((prev) => ({
+          ...prev,
+          scan: prev.scan ? { ...prev.scan, status: 'completed' } : prev.scan,
+        }))
         break
       case 'failed':
-        handleFailed(message, setState)
+        setState((prev) => ({
+          ...prev,
+          scan: prev.scan ? { ...prev.scan, status: 'failed' } : prev.scan,
+          outputLines: [...prev.outputLines, `Error: ${message.error}`],
+        }))
         break
     }
   }, [])
 
-  const { status } = useWebSocket(wsUrl, { onMessage: handleMessage })
+  useEffect(() => {
+    if (!scanId) return
 
-  return { ...state, connectionStatus: status }
+    let cancelled = false
+
+    const connect = () => {
+      if (cancelled) return
+
+      setState((prev) => ({ ...prev, connectionStatus: 'connecting' }))
+
+      const ws = new WebSocket(`${WS_BASE}/scan/${scanId}/stream`)
+      wsRef.current = ws
+
+      ws.onopen = () => {
+        if (cancelled) { ws.close(); return }
+        setState((prev) => ({ ...prev, connectionStatus: 'connected' }))
+        stopPolling()
+      }
+
+      ws.onmessage = handleMessage
+
+      ws.onclose = () => {
+        if (cancelled) return
+        setState((prev) => ({ ...prev, connectionStatus: 'disconnected' }))
+        wsRef.current = null
+        startPolling(scanId, setState)
+      }
+
+      ws.onerror = () => {
+        ws.close()
+      }
+    }
+
+    const startPolling = (id: string, set: typeof setState) => {
+      if (pollRef.current) return
+
+      pollRef.current = setInterval(async () => {
+        try {
+          const scan = await getScan(id)
+          if (!scan) return
+
+          const lines = scan.raw_output ? scan.raw_output.split('\n').filter(Boolean) : []
+          set({
+            scan,
+            outputLines: lines,
+            hosts: scan.hosts ?? [],
+            connectionStatus: 'disconnected',
+          })
+
+          if (scan.status === 'completed' || scan.status === 'failed') {
+            stopPolling()
+          }
+        } catch { /* ignore poll errors */ }
+      }, 2000)
+    }
+
+    const stopPolling = () => {
+      if (pollRef.current) {
+        clearInterval(pollRef.current)
+        pollRef.current = null
+      }
+    }
+
+    connect()
+
+    return () => {
+      cancelled = true
+      wsRef.current?.close()
+      wsRef.current = null
+      stopPolling()
+    }
+  }, [scanId, handleMessage])
+
+  return state
 }
 
-type SetState = React.Dispatch<React.SetStateAction<ScanStreamState>>
-
-function handleSnapshot(message: Record<string, unknown>, setState: SetState) {
+function applySnapshot(
+  message: Record<string, unknown>,
+  setState: React.Dispatch<React.SetStateAction<ScanStreamState>>
+) {
   const scan = message.scan as ScanResult
   const lines = scan.raw_output ? scan.raw_output.split('\n').filter(Boolean) : []
-  setState({
+  setState((prev) => ({
+    ...prev,
     scan,
     outputLines: lines,
     hosts: scan.hosts ?? [],
-  })
-}
-
-function handleOutput(message: Record<string, unknown>, setState: SetState) {
-  const line = message.line as string
-  setState((prev) => ({
-    ...prev,
-    outputLines: [...prev.outputLines, line],
-  }))
-}
-
-function handleHostDiscovered(message: Record<string, unknown>, setState: SetState) {
-  const host = message.host as Host
-  setState((prev) => ({
-    ...prev,
-    hosts: [...prev.hosts, host],
-  }))
-}
-
-function handleCompleted(setState: SetState) {
-  setState((prev) => ({
-    ...prev,
-    scan: prev.scan ? { ...prev.scan, status: 'completed' } : prev.scan,
-  }))
-}
-
-function handleFailed(message: Record<string, unknown>, setState: SetState) {
-  const error = message.error as string
-  setState((prev) => ({
-    ...prev,
-    scan: prev.scan ? { ...prev.scan, status: 'failed' } : prev.scan,
-    outputLines: [...prev.outputLines, `Error: ${error}`],
   }))
 }

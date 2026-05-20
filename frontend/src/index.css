@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+:root {
+  --radar-green: #00ff41;
+  --radar-green-dim: #00ff4133;
+  --radar-amber: #ffb000;
+  --hud-border: #1a3a1a;
+  --bg-dark: #0a0f0a;
+  --bg-panel: #0d1a0d;
+  --text-primary: #c0ffc0;
+  --text-dim: #4a7a4a;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+}

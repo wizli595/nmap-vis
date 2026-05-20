@@ -1,0 +1,34 @@
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../backend:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NMAP_IMAGE=nmap-vis-nmap
+      - SCAN_TIMEOUT=600
+    depends_on:
+      - nmap-build
+
+  nmap-build:
+    build:
+      context: .
+      dockerfile: Dockerfile.nmap
+    image: nmap-vis-nmap
+    entrypoint: ["echo", "nmap image built"]
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000

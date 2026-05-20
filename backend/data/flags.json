@@ -1,0 +1,256 @@
+[
+  {
+    "flag": "-sS",
+    "name": "SYN Scan",
+    "description": "Half-open scan. Sends SYN, reads response, never completes handshake. Fast and stealthy.",
+    "category": "scan_type",
+    "has_value": false
+  },
+  {
+    "flag": "-sT",
+    "name": "TCP Connect",
+    "description": "Full TCP handshake. Works without root privileges but slower and logged by target.",
+    "category": "scan_type",
+    "has_value": false
+  },
+  {
+    "flag": "-sU",
+    "name": "UDP Scan",
+    "description": "Scans UDP ports. Slower than TCP but finds DNS, SNMP, DHCP services.",
+    "category": "scan_type",
+    "has_value": false
+  },
+  {
+    "flag": "-sF",
+    "name": "FIN Scan",
+    "description": "Sends FIN packet. Can bypass simple firewalls that only block SYN.",
+    "category": "scan_type",
+    "has_value": false
+  },
+  {
+    "flag": "-sX",
+    "name": "XMAS Scan",
+    "description": "Sets FIN, PSH, URG flags. Lights up the packet like a Christmas tree.",
+    "category": "scan_type",
+    "has_value": false
+  },
+  {
+    "flag": "-sN",
+    "name": "NULL Scan",
+    "description": "Sends packet with no flags set. Stealthy against some firewalls.",
+    "category": "scan_type",
+    "has_value": false
+  },
+  {
+    "flag": "-sA",
+    "name": "ACK Scan",
+    "description": "Maps firewall rules. Determines which ports are filtered vs unfiltered.",
+    "category": "scan_type",
+    "has_value": false
+  },
+  {
+    "flag": "-sn",
+    "name": "Ping Scan",
+    "description": "Host discovery only. No port scan. Fast way to find live hosts.",
+    "category": "scan_type",
+    "has_value": false
+  },
+  {
+    "flag": "-sV",
+    "name": "Version Detection",
+    "description": "Probes open ports to determine service name and version number.",
+    "category": "detection",
+    "has_value": false
+  },
+  {
+    "flag": "-O",
+    "name": "OS Detection",
+    "description": "Attempts to identify the target operating system via TCP/IP fingerprinting.",
+    "category": "detection",
+    "has_value": false
+  },
+  {
+    "flag": "-A",
+    "name": "Aggressive Scan",
+    "description": "Enables OS detection, version detection, script scanning, and traceroute.",
+    "category": "detection",
+    "has_value": false
+  },
+  {
+    "flag": "-p",
+    "name": "Port Range",
+    "description": "Specify which ports to scan. Examples: -p 22, -p 1-1000, -p U:53,T:80.",
+    "category": "port",
+    "has_value": true,
+    "value_hint": "e.g. 1-1000 or 22,80,443"
+  },
+  {
+    "flag": "--top-ports",
+    "name": "Top Ports",
+    "description": "Scan the N most common ports based on nmap frequency data.",
+    "category": "port",
+    "has_value": true,
+    "value_hint": "e.g. 100, 1000"
+  },
+  {
+    "flag": "-F",
+    "name": "Fast Scan",
+    "description": "Scan fewer ports than default. Scans top 100 instead of top 1000.",
+    "category": "port",
+    "has_value": false
+  },
+  {
+    "flag": "-p-",
+    "name": "All Ports",
+    "description": "Scan all 65535 ports. Thorough but slow.",
+    "category": "port",
+    "has_value": false
+  },
+  {
+    "flag": "-T0",
+    "name": "Paranoid Timing",
+    "description": "Extremely slow. Waits 5 minutes between probes. For IDS evasion.",
+    "category": "timing",
+    "has_value": false
+  },
+  {
+    "flag": "-T1",
+    "name": "Sneaky Timing",
+    "description": "Slow. 15 second delay between probes. Avoids most IDS triggers.",
+    "category": "timing",
+    "has_value": false
+  },
+  {
+    "flag": "-T2",
+    "name": "Polite Timing",
+    "description": "Slows down to consume less bandwidth. 0.4 second delay.",
+    "category": "timing",
+    "has_value": false
+  },
+  {
+    "flag": "-T3",
+    "name": "Normal Timing",
+    "description": "Default speed. Balanced between speed and reliability.",
+    "category": "timing",
+    "has_value": false
+  },
+  {
+    "flag": "-T4",
+    "name": "Aggressive Timing",
+    "description": "Faster scanning. Assumes a fast and reliable network.",
+    "category": "timing",
+    "has_value": false
+  },
+  {
+    "flag": "-T5",
+    "name": "Insane Timing",
+    "description": "Maximum speed. May miss ports on slow networks. Use on LAN only.",
+    "category": "timing",
+    "has_value": false
+  },
+  {
+    "flag": "-Pn",
+    "name": "Skip Host Discovery",
+    "description": "Treat all hosts as online. Skip ping. Useful when ICMP is blocked.",
+    "category": "host_discovery",
+    "has_value": false
+  },
+  {
+    "flag": "-PS",
+    "name": "TCP SYN Discovery",
+    "description": "Send SYN packet to discover hosts. Default port 80.",
+    "category": "host_discovery",
+    "has_value": true,
+    "value_hint": "e.g. 22,80,443"
+  },
+  {
+    "flag": "-PA",
+    "name": "TCP ACK Discovery",
+    "description": "Send ACK packet to discover hosts. Useful when SYN is filtered.",
+    "category": "host_discovery",
+    "has_value": true,
+    "value_hint": "e.g. 80,443"
+  },
+  {
+    "flag": "-PU",
+    "name": "UDP Discovery",
+    "description": "Send UDP packet to discover hosts. Hits closed ports to trigger ICMP response.",
+    "category": "host_discovery",
+    "has_value": true,
+    "value_hint": "e.g. 40125"
+  },
+  {
+    "flag": "--traceroute",
+    "name": "Traceroute",
+    "description": "Trace the hop path to each host after scan.",
+    "category": "output",
+    "has_value": false
+  },
+  {
+    "flag": "--reason",
+    "name": "Show Reason",
+    "description": "Show why each port is in a particular state.",
+    "category": "output",
+    "has_value": false
+  },
+  {
+    "flag": "-v",
+    "name": "Verbose",
+    "description": "Increase verbosity level. Shows open ports as they are found.",
+    "category": "output",
+    "has_value": false
+  },
+  {
+    "flag": "-vv",
+    "name": "Very Verbose",
+    "description": "Even more verbosity. Shows detailed scan progress.",
+    "category": "output",
+    "has_value": false
+  },
+  {
+    "flag": "--open",
+    "name": "Open Ports Only",
+    "description": "Only show open ports in results. Reduces noise.",
+    "category": "output",
+    "has_value": false
+  },
+  {
+    "flag": "-D",
+    "name": "Decoy Scan",
+    "description": "Send scans from spoofed IPs alongside yours. Makes source harder to identify.",
+    "category": "evasion",
+    "has_value": true,
+    "value_hint": "e.g. RND:5 or 10.0.0.1,10.0.0.2,ME"
+  },
+  {
+    "flag": "-f",
+    "name": "Fragment Packets",
+    "description": "Split packets into tiny fragments. May bypass packet inspection firewalls.",
+    "category": "evasion",
+    "has_value": false
+  },
+  {
+    "flag": "--data-length",
+    "name": "Append Random Data",
+    "description": "Add random bytes to packets. Changes packet signature to evade IDS.",
+    "category": "evasion",
+    "has_value": true,
+    "value_hint": "e.g. 25"
+  },
+  {
+    "flag": "--script",
+    "name": "NSE Script",
+    "description": "Run Nmap Scripting Engine scripts. Powerful vulnerability detection.",
+    "category": "script",
+    "has_value": true,
+    "value_hint": "e.g. vuln, http-title, ssl-enum-ciphers"
+  },
+  {
+    "flag": "--script-args",
+    "name": "Script Arguments",
+    "description": "Pass arguments to NSE scripts.",
+    "category": "script",
+    "has_value": true,
+    "value_hint": "e.g. user=admin,pass=secret"
+  }
+]

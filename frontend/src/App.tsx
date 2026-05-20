@@ -1,4 +1,5 @@
 import './index.css'
+import { ScanPage } from './features/scanner/ScanPage'
 
 function App() {
   return (
@@ -9,8 +10,8 @@ function App() {
         <span className="text-[var(--text-dim)] text-sm ml-auto">v0.1.0</span>
       </header>
 
-      <main className="flex items-center justify-center h-[calc(100vh-64px)]">
-        <p className="text-[var(--text-dim)] text-lg">System online. Ready to scan.</p>
+      <main className="py-8">
+        <ScanPage />
       </main>
     </div>
   )

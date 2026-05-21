@@ -2,12 +2,13 @@
 import pytest
 
 from models.scan import Host, Port, PortState, ScanResult, ScanStatus
-from store import scan_store
+from store import history_store, scan_store
 from store.event_bus import event_bus
 
 
 @pytest.fixture(autouse=True)
 def clean_store():
+    history_store.init_db()
     scan_store._scans.clear()
     yield
     scan_store._scans.clear()

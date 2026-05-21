@@ -27,21 +27,18 @@ Nmap is powerful but its flags are hard to remember. **nmap-vis** wraps it in a 
 - **Browse NSE scripts** — searchable picker for 20+ common scripts
 - **Review history** — every scan is saved to SQLite, revisit results anytime
 
-Nmap runs inside a Docker container (Kali Linux) — no local installation needed.
+Two modes: **Docker** (no local nmap needed, some LAN limitations) or **Local** (full power, requires nmap installed). A setup wizard guides you on first launch.
 
 ---
 
 ## Quick Start
 
-**Prerequisites:** [Docker Desktop](https://www.docker.com/products/docker-desktop/), Python 3.12+, Node.js 20+
+**Prerequisites:** Python 3.12+, Node.js 20+, and either [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [nmap](https://nmap.org/download.html)
 
 ```bash
 # Clone
 git clone https://github.com/wizli595/nmap-vis.git
 cd nmap-vis
-
-# Build the nmap Docker image (Kali + nmap)
-make docker-build
 
 # Set up the backend
 cd backend
@@ -59,11 +56,14 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:5173** and start scanning.
+Open **http://localhost:5173** — the setup wizard will guide you through choosing Docker or Local mode and building the nmap image if needed.
 
 ---
 
 ## Features
+
+### Setup Wizard
+First-launch onboarding with two paths: **Docker Mode** (builds Kali+nmap container from the UI with streaming logs) or **Local Mode** (detects your OS, checks for nmap, shows install command). Auto-skips on subsequent visits.
 
 ### Visual Scan Builder
 Build nmap commands without memorizing flags. Every option has a description. Live command preview shows exactly what will run.

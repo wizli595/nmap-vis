@@ -10,6 +10,7 @@ from routes.health import router as health_router
 from routes.history import router as history_router
 from routes.scan import router as scan_router
 from routes.scripts import router as scripts_router
+from routes.setup import router as setup_router
 from routes.stream import router as stream_router
 from services.docker_manager import docker_manager
 from store import history_store
@@ -43,3 +44,4 @@ app.include_router(scan_router)
 app.include_router(stream_router)
 app.include_router(history_router)
 app.include_router(scripts_router)
+app.include_router(setup_router)

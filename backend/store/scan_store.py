@@ -2,9 +2,9 @@ from datetime import datetime
 from typing import Any
 
 from logger import get_logger
-from models.scan import ScanResult, ScanStatus, Host
-from store.event_bus import event_bus
+from models.scan import Host, ScanResult, ScanStatus
 from store import history_store
+from store.event_bus import event_bus
 
 log = get_logger("scan_store")
 

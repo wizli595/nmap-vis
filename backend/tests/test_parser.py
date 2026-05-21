@@ -1,8 +1,7 @@
 import pytest
 
-from services.parser import parse_nmap_xml
 from models.scan import PortState
-
+from services.parser import parse_nmap_xml
 
 SINGLE_HOST_XML = """<?xml version="1.0"?>
 <nmaprun>

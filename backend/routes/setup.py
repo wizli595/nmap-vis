@@ -53,26 +53,39 @@ async def docker_build():
 
 
 async def _stream_docker_build():
-    process = await asyncio.create_subprocess_exec(
-        "docker", "build",
-        "-t", "nmap-vis-nmap",
-        "-f", str(DOCKERFILE_PATH),
-        str(DOCKER_CONTEXT),
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-    )
+    queue: asyncio.Queue[str | None] = asyncio.Queue()
 
-    async for line in process.stdout:
-        decoded = line.decode().strip()
-        if decoded:
-            yield decoded + "\n"
+    def run_build():
+        try:
+            process = subprocess.Popen(
+                ["docker", "build", "-t", "nmap-vis-nmap",
+                 "-f", str(DOCKERFILE_PATH), str(DOCKER_CONTEXT)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+            for line in iter(process.stdout.readline, ""):
+                stripped = line.strip()
+                if stripped:
+                    queue.put_nowait(stripped)
+            process.wait()
+            queue.put_nowait("__BUILD_SUCCESS__" if process.returncode == 0 else "__BUILD_FAILED__")
+        except Exception as err:
+            queue.put_nowait(f"Error: {err}")
+            queue.put_nowait("__BUILD_FAILED__")
+        finally:
+            queue.put_nowait(None)
 
-    await process.wait()
+    import threading
+    threading.Thread(target=run_build, daemon=True).start()
 
-    if process.returncode == 0:
-        yield "__BUILD_SUCCESS__\n"
-    else:
-        yield "__BUILD_FAILED__\n"
+    while True:
+        while queue.empty():
+            await asyncio.sleep(0.1)
+        line = queue.get_nowait()
+        if line is None:
+            break
+        yield line + "\n"
 
 
 def _check_local_nmap() -> bool:

@@ -11,19 +11,11 @@ export function HistoryPage({ onViewScan }: Props) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadHistory()
+    listHistory()
+      .then(setScans)
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
-
-  const loadHistory = async () => {
-    try {
-      const data = await listHistory()
-      setScans(data)
-    } catch {
-      /* ignore */
-    } finally {
-      setLoading(false)
-    }
-  }
 
   if (loading) {
     return <LoadingState />

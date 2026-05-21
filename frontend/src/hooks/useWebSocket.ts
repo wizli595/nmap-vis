@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type MessageHandler = (data: unknown) => void
 type Status = 'connecting' | 'connected' | 'disconnected'
@@ -12,12 +12,14 @@ export function useWebSocket(url: string | null, options: UseWebSocketOptions) {
   const [status, setStatus] = useState<Status>('disconnected')
   const wsRef = useRef<WebSocket | null>(null)
   const optionsRef = useRef(options)
-  optionsRef.current = options
 
-  const connect = useCallback(() => {
+  useEffect(() => {
+    optionsRef.current = options
+  }, [options])
+
+  useEffect(() => {
     if (!url) return
 
-    setStatus('connecting')
     const ws = new WebSocket(url)
     wsRef.current = ws
 
@@ -33,17 +35,12 @@ export function useWebSocket(url: string | null, options: UseWebSocketOptions) {
       wsRef.current = null
       optionsRef.current.onClose?.()
     }
+
+    return () => {
+      ws.close()
+      wsRef.current = null
+    }
   }, [url])
 
-  const disconnect = useCallback(() => {
-    wsRef.current?.close()
-    wsRef.current = null
-  }, [])
-
-  useEffect(() => {
-    connect()
-    return disconnect
-  }, [connect, disconnect])
-
-  return { status, disconnect }
+  return { status }
 }

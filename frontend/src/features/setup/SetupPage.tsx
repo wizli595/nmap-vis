@@ -203,8 +203,13 @@ function LocalOption({ os, expanded, onSelect, onReady }: {
   }
 
   useEffect(() => {
-    if (expanded && !nmapInfo) handleCheck()
-  }, [expanded])
+    if (expanded && !nmapInfo) {
+      checkNmap().then((info) => {
+        setNmapInfo(info)
+        setChecking(false)
+      })
+    }
+  }, [expanded, nmapInfo])
 
   return (
     <div

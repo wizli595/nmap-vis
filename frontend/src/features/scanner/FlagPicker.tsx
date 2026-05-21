@@ -1,4 +1,4 @@
-import { ALL_FLAG_GROUPS } from '../../data/flags'
+import { ALL_FLAG_GROUPS, type FlagDefinition } from '../../data/flags'
 import { FlagToggle } from './FlagToggle'
 
 export function FlagPicker() {
@@ -24,7 +24,7 @@ function FlagGroup({ label, flags }: FlagGroupProps) {
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {flags.map((flag) => (
-          <FlagToggle key={flag.id} flag={flag as any} />
+          <FlagToggle key={flag.id} flag={flag as FlagDefinition} />
         ))}
       </div>
     </div>

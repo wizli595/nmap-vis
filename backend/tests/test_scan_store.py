@@ -1,8 +1,7 @@
-import asyncio
 
 import pytest
 
-from models.scan import ScanResult, ScanStatus, Host, Port, PortState
+from models.scan import Host, Port, PortState, ScanResult, ScanStatus
 from store import scan_store
 from store.event_bus import event_bus
 

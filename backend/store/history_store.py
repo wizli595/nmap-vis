@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from logger import get_logger
-from models.scan import ScanResult, ScanStatus, Host
+from models.scan import Host, ScanResult, ScanStatus
 
 log = get_logger("history")
 

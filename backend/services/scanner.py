@@ -3,7 +3,7 @@ import re
 from uuid import uuid4
 
 from logger import get_logger
-from models.scan import ScanRequest, ScanResult, ScanStatus, Host, Port, PortState
+from models.scan import Host, Port, PortState, ScanRequest, ScanResult, ScanStatus
 from services.command_builder import CommandBuilder
 from services.docker_manager import docker_manager
 from services.parser import parse_nmap_xml

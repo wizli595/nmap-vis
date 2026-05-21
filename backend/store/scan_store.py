@@ -53,7 +53,7 @@ async def mark_completed(scan_id: str, hosts: list[Host]) -> None:
     scan = _scans.get(scan_id)
     if not scan:
         return
-    scan.hosts = hosts
+    scan.hosts = hosts if hosts else scan.hosts
     scan.status = ScanStatus.COMPLETED
     scan.finished_at = datetime.now()
     await _publish(scan_id, {"type": "completed", "host_count": len(hosts)})

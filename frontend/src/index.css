@@ -17,3 +17,26 @@ body {
   color: var(--text-primary);
   font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 }
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hud-border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--hud-border);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
